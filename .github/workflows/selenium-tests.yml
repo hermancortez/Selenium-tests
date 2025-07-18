@@ -7,29 +7,41 @@ on:
     branches: [ main ]
 
 jobs:
-    test:
-      runs-on: ubuntu-latest
-      services:
-        selenium:
-          image: selenium/standalone-chrome
-          ports:
-            - 4444:4444
-          options: >-
-            --shm-size=2g
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
 
-        - name: Set up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: '3.9'
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+        options: >
+          --shm-size=2g
 
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Run Selenium tests
-          run: |
-            pytest tests/selenium_tests.py --driver Remote --remote-url http://localhost:4444/wd/hub
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' # Puedes cambiar a '3.9' o '3.13' si lo necesitas específico
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for Selenium Hub
+        run: |
+          for i in $(seq 1 10); do
+            curl -s http://localhost:4444/wd/hub/status && break
+            echo "Waiting for Selenium Hub..."
+            sleep 5
+          done
+
+      - name: Run Selenium tests
+        run: |
+          # CORRECCIÓN: Eliminar los argumentos --driver y --remote-url
+          # Estos argumentos se configuran directamente en tests/first_test.py
+          pytest tests/first_test.py # Solo necesitas decirle a pytest qué archivo ejecutar
