@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+.venv/
+
+# Ignorar tu entorno virtual específico (.cupon)
+.cupon/
+
+# IDEs
+.vscode/        # Si usas VS Code para configuraciones de usuario/espacio de trabajo
+.idea/          # Si usas PyCharm u otros IDEs de JetBrains
+
+# Archivos de caché y logs
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Bases de datos SQLite
+*.sqlite3
+*.db
+
+# Archivos de distribución
+dist/
+build/
+*.egg-info/
+
+# Pytest cache
+.pytest_cache/
+
+# Datos sensibles o de configuración local
+*.env
+.env
