@@ -1,47 +1,39 @@
-name: Selenium Tests
+# filepath: /root/DEVOPS/modulo4/selenium-funcionable-test/.github/workflows/pytest.yml
+name: Run Pytest
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    services:
-      selenium:
-        image: selenium/standalone-chrome:latest
-        ports:
-          - 4444:4444
-        options: >
-          --shm-size=2g
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x' # Puedes cambiar a '3.9' o '3.13' si lo necesitas específico
+          python-version: "3.12"
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+
+      - name: Setup ChromeDriver
+        uses: nanasess/setup-chromedriver@master
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for Selenium Hub
+      - name: Run tests
         run: |
-          for i in $(seq 1 10); do
-            curl -s http://localhost:4444/wd/hub/status && break
-            echo "Waiting for Selenium Hub..."
-            sleep 5
-          done
+          pytest --maxfail=1 --disable-warnings -q --junitxml=test-results.xml
 
-      - name: Run Selenium tests
-        run: |
-          # CORRECCIÓN: Eliminar los argumentos --driver y --remote-url
-          # Estos argumentos se configuran directamente en tests/first_test.py
-          pytest tests/first_test.py # Solo necesitas decirle a pytest qué archivo ejecutar
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-results
+          path: test-results.xml
