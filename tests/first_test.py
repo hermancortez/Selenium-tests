@@ -1,14 +1,31 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-# Ya no necesitamos Options ni Service si Selenium Manager gestiona el driver localmente
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options # Necesario para configurar Chrome
 
 def test_page_title():
-    # Con el nuevo pytest.yml, Chrome y ChromeDriver se instalan directamente en el runner.
-    # Selenium Manager (integrado en Selenium 4.6+) detectará automáticamente el ChromeDriver.
-    # Por lo tanto, no necesitamos especificar un Service local ni un Remote WebDriver.
-    browser = webdriver.Chrome()
+    # Configurar opciones de Chrome para ejecución en un entorno de CI/CD.
+    chrome_options = Options()
+    # --headless: Ejecuta Chrome sin abrir una ventana visible. Esencial para entornos CI.
+    chrome_options.add_argument("--headless")
+    # --no-sandbox: Necesario para ejecutar Chrome dentro de contenedores Docker en Linux
+    # para evitar problemas de permisos.
+    chrome_options.add_argument("--no-sandbox")
+    # --disable-dev-shm-usage: Aborda un problema común de memoria compartida en entornos Docker
+    # que puede causar fallos en Chrome.
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    # NUEVAS OPCIONES PARA RESOLVER "user data directory is already in use"
+    # --incognito: Inicia Chrome en modo incógnito, lo que usa un perfil temporal y limpio.
+    chrome_options.add_argument("--incognito")
+    # --disable-gpu: Deshabilita el uso de la GPU. A veces necesario en entornos sin GPU.
+    chrome_options.add_argument("--disable-gpu")
+    # --window-size: Establece un tamaño de ventana para el navegador headless.
+    chrome_options.add_argument("--window-size=1920,1080")
+
+
+    # Inicializar el WebDriver.
+    # Selenium Manager (integrado en Selenium 4.6+) detectará automáticamente el ChromeDriver
+    # instalado por las acciones de GitHub.
+    browser = webdriver.Chrome(options=chrome_options) # Pasar las opciones configuradas
 
     try:
         # Navegar a la página de GitHub
@@ -23,7 +40,6 @@ def test_page_title():
         title_element = browser.find_element(By.ID, 'hero-section-brand-heading')
 
         # Definir el texto esperado.
-        # Se eliminó el punto final para que coincida con el texto real del elemento.
         expected_text = 'Build and ship software on a single, collaborative platform'
 
         # Realizar la aserción: verificar que el texto del elemento coincide con el esperado.
